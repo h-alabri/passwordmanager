@@ -5,7 +5,6 @@ import { useAuthContext } from "../hooks/useAuthContext"
 // components
 import CredentialDetails from '../components/CredentialDetails'
 import CredentialForm from '../components/CredentialForm'
-import PasswordGenerator from '../components/PasswordGenerator'
 
 const Home = () => {
   const {credentials, dispatch} = useCredentialsContext()
