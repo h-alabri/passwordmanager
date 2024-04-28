@@ -7,13 +7,52 @@ import { toast } from 'react-toastify';
 
 const CredentialForm = () => {
 
-  //for password generator
-  const lowercaseList = 'abcdefghijklmnopqrstuvwxyz';
-const uppercaseList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const numbersList = '0123456789';
-const symbolsList = "!@#$%^&*()?";
+    // Define the handleSubmit function
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-const [password, setPassword] = useState('');
+    if (!user) {
+      setError('You must be logged in');
+      return;
+    }
+
+    const credential = { username, domain, pwd };
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/credentials`, {
+        method: 'POST',
+        body: JSON.stringify(credential),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+      const json = await response.json();
+
+      if (!response.ok) {
+        setError(json.error);
+        setEmptyFields(json.emptyFields);
+      } else {
+        setUsername('');
+        setDomain('');
+        setPwd('');
+        setError(null);
+        setEmptyFields([]);
+        dispatch({ type: 'CREATE_CREDENTIAL', payload: json });
+      }
+    } catch (error) {
+      console.error('Error creating credential:', error);
+      setError('An error occurred while creating the credential');
+    }
+  };
+
+  //for password generator
+    const lowercaseList = 'abcdefghijklmnopqrstuvwxyz';
+    const uppercaseList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbersList = '0123456789';
+    const symbolsList = "!@#$%^&*()?";
+
+    const [password, setPassword] = useState('');
     const [lowerCase, setLowerCase] = useState(true);
     const [upperCase, setUpperCase] = useState(true);
     const [numbers, setNumbers] = useState(true);
@@ -93,39 +132,6 @@ const [password, setPassword] = useState('');
   const [error, setError] = useState(null)
   const [emptyFields, setEmptyFields] = useState([])
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    if (!user) {
-      setError('You must be logged in')
-      return
-    }
-
-    const credential = {username, domain, pwd}
-
-    const response = await fetch('/api/credentials', {
-      method: 'POST',
-      body: JSON.stringify(credential),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${user.token}`
-      }
-    })
-    const json = await response.json()
-
-    if (!response.ok) {
-      setError(json.error)
-      setEmptyFields(json.emptyFields)
-    }
-    if (response.ok) {
-      setUsername('')
-      setDomain('')
-      setPwd('')
-      setError(null)
-      setEmptyFields([])
-      dispatch({type: 'CREATE_CREDENTIAL', payload: json})
-    }
-  }
   console.log(emptyFields); // Add this to see what `emptyFields` contains before it's accessed
 
   return (

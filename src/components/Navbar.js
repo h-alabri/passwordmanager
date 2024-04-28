@@ -1,14 +1,28 @@
-import { Link } from 'react-router-dom'
-import { useLogout } from '../hooks/useLogout'
-import { useAuthContext } from '../hooks/useAuthContext'
+import { Link } from 'react-router-dom';
+import { useAuthContext } from '../hooks/useAuthContext';
 
 const Navbar = () => {
-  const { logout } = useLogout()
-  const { user } = useAuthContext()
+  const { user, logout } = useAuthContext();
 
-  const handleClick = () => {
-    logout()
-  }
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+      if (response.ok) {
+        logout();
+      } else {
+        // Handle logout error
+        console.error('Logout failed:', response.statusText);
+      }
+    } catch (error) {
+      // Handle fetch error
+      console.error('Logout failed:', error.message);
+    }
+  };
 
   return (
     <header>
@@ -17,13 +31,12 @@ const Navbar = () => {
           <h1 id="title">Sentinelle</h1>
         </Link>
         <nav>
-          {user && (
+          {user ? (
             <div>
               <span>{user.email}</span>
-              <button id="navlinks" onClick={handleClick} >Log out</button>
+              <button id="navlinks" onClick={handleLogout}>Log out</button>
             </div>
-          )}
-          {!user && (
+          ) : (
             <div>
               <Link to="/login">Login &nbsp;</Link>
               <Link to="/signup"><button id="Signup">Signup</button></Link>
@@ -32,7 +45,7 @@ const Navbar = () => {
         </nav>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;
